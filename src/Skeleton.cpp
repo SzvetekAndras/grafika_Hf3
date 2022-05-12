@@ -51,7 +51,7 @@ public:
     Camera() {
         asp = (float)windowWidth / windowHeight;
         fov = 75.0f * (float)M_PI / 180.0f;
-        fp = 1; bp = 20;
+        fp = 1; bp = 100;
     }
     mat4 V() { // view matrix: translates the center to the origin
         vec3 w = normalize(wEye - wLookat);
@@ -462,7 +462,7 @@ class Cylinder : public ParamSurface {
 public:
     Cylinder() { create(); }
     void eval(Dnum2& U, Dnum2& V, Dnum2& X, Dnum2& Y, Dnum2& Z) {
-        U = U * 2.0f * M_PI, V = V * 2 - 1.0f;
+        U = U * 2.0f * M_PI, V = V;
         X = Cos(U); Z = Sin(U); Y = V;
     }
 };
@@ -592,11 +592,11 @@ public:
         Geometry * paraboloid = new Paraboloid();
         // Create objects by setting up their vertex data on the GPU
         Object *  planeObject1 = new Object(phongShader, material0, texture4x8, plane);
-        planeObject1->scale = vec3(6.0f, 6.0f, 6.0f);
+        planeObject1->scale = vec3(16.0f, 16.0f, 16.0f);
         objects.push_back( planeObject1);
 
         Object * cilinderObject0 = new Object(phongShader, material0, texture15x20,  cilinder0);
-        cilinderObject0->scale = vec3(2.0f, 0.25f, 2.0f);
+        cilinderObject0->scale = vec3(2.0f, 0.5f, 2.0f);
         objects.push_back(cilinderObject0);
 
         Object * mobiusObject1 = new Object(phongShader, material0, texture4x8, cylindertop);
@@ -609,7 +609,7 @@ public:
 
         // Create objects by setting up their vertex data on the GPU
         Object * cilinderObject1 = new Object(phongShader, material0, texture15x20,  cilinder1);
-        cilinderObject1->scale = vec3(0.3f, 1.0f, 0.3f);
+        cilinderObject1->scale = vec3(0.3f, 2.0f, 0.3f);
         objects.push_back(cilinderObject1);
 
         // Create objects by setting up their vertex data on the GPU
@@ -620,7 +620,7 @@ public:
 
         // Create objects by setting up their vertex data on the GPU
         Object * cilinderObject2 = new Object(phongShader, material0, texture15x20,  cilinder2);
-        cilinderObject2->scale = vec3(0.3f, 1.0f, 0.3f);
+        cilinderObject2->scale = vec3(0.3f, 2.0f, 0.3f);
         objects.push_back(cilinderObject2);
 
         // Create objects by setting up their vertex data on the GPU
@@ -629,29 +629,31 @@ public:
         objects.push_back(sphereObject3);
 
         Object * paraboloidObject1 = new Object(phongShader, material1, texture15x20, paraboloid);
-        paraboloidObject1->scale = vec3(2.0f, 2.0f, 2.0f);
+        paraboloidObject1->scale = vec3(2.0f, 1.5f, 2.0f);
 
         objects.push_back(paraboloidObject1);
 
         int nObjects = objects.size();
         // Camera
-        camera.wEye = vec3(0, 0, 8);
-        camera.wLookat = vec3(0, 0, 0);
+        camera.wEye = vec3(10, 3, 10);
+        camera.wLookat = vec3(0, 1, 0);
         camera.wVup = vec3(0, 1, 0);
+
 
         // Lights
         lights.resize(3);
-        lights[0].wLightPos = vec4(5, 5, 4, 0);	// ideal point -> directional light source
+        lights[0].wLightPos = vec4(5, 5, 4, 1);	// ideal point -> directional light sourceSSS
         lights[0].La = vec3(0.1f, 0.1f, 1);
         lights[0].Le = vec3(3, 0, 0);
 
-        lights[1].wLightPos = vec4(5, 10, 20, 0);	// ideal point -> directional light source
+        lights[1].wLightPos = vec4(5, 10, 20, 1);	// ideal point -> directional light source
         lights[1].La = vec3(0.2f, 0.2f, 0.2f);
         lights[1].Le = vec3(0, 3, 0);
 
-        lights[2].wLightPos = vec4(-5, 5, 5, 0);	// ideal point -> directional light source
+        lights[2].wLightPos = vec4(-5, 5, 5, 1);	// ideal point -> directional light source
         lights[2].La = vec3(0.1f, 0.1f, 0.1f);
         lights[2].Le = vec3(0, 0, 3);
+
     }
 
     void Render() {
@@ -704,7 +706,7 @@ void onDisplay() {
 
     scene.objects[1]->rotationAngle = 0.0f;
     scene.objects[1]->rotationAxis = vec3(0, 1, 0);
-    scene.objects[1]->translation = vec3(0, -3.25, 0);
+    scene.objects[1]->translation = vec3(0, -3.5, 0);
 
 
     scene.objects[2]->rotationAngle = 0.0f;
@@ -717,9 +719,9 @@ void onDisplay() {
     scene.objects[3]->translation = vec3(0, -3, 0);
     scene.objects[3]->SetModelingTransform( M, Minv);
 
-    temp = vec4(0, 2, 0, 1) * M;
+    temp = vec4(0, 0, 0, 1) * M;
     scene.objects[4]->rotationAngle = ttime;
-    scene.objects[4]->rotationAxis =vec3(-0.5,1,-0.3);
+    scene.objects[4]->rotationAxis =vec3(0.3,1,0.3);
     scene.objects[4]->translation = vec3(temp.x, temp.y, temp.z);
     scene.objects[4]->SetModelingTransform( M, Minv);
 
@@ -729,9 +731,9 @@ void onDisplay() {
     scene.objects[5]->translation = vec3(temp.x, temp.y, temp.z);
     scene.objects[5]->SetModelingTransform( M, Minv);
 
-    temp = vec4(0, 2, 0, 1) * M;
+    temp = vec4(0, 0, 0, 1) * M;
     scene.objects[6]->rotationAngle = ttime;
-    scene.objects[6]->rotationAxis = vec3(1,1,0.5);
+    scene.objects[6]->rotationAxis = vec3(-0.5,1,-0.5);
     scene.objects[6]->translation =  vec3(temp.x, temp.y, temp.z);
     scene.objects[6]->SetModelingTransform( M, Minv);
 
@@ -741,8 +743,17 @@ void onDisplay() {
     scene.objects[7]->translation = vec3(temp.x, temp.y, temp.z);
 
     scene.objects[8]->rotationAngle = ttime;
-    scene.objects[8]->rotationAxis = vec3(0,0.5,0.5);
+    scene.objects[8]->rotationAxis = vec3(-0.3,0.5,-0.1);
     scene.objects[8]->translation = vec3(temp.x, temp.y, temp.z);
+    scene.objects[8]->SetModelingTransform( M, Minv);
+    temp = vec4(0, 0.6, 0, 1) * M;
+    scene.lights[0].wLightPos = vec4(temp.x, temp.y, temp.z,1);
+    vec3 eye = vec3(8, 3, 8);
+    vec3 lookat = vec3(0, 1, 0);
+    ttime=ttime/2;
+    vec3 rotMat3 = vec3((eye.x - lookat.x) * cos(ttime) + (eye.z - lookat.z) * sin(ttime) + lookat.x,eye.y,-(eye.x - lookat.x) * sin(ttime) + (eye.z - lookat.z) * cos(ttime) + lookat.z);
+    scene.camera.wEye =rotMat3;
+
 }
 
 // Key of ASCII code pressed
