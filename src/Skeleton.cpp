@@ -552,10 +552,11 @@ public:
 //---------------------------
 class Scene {
 //---------------------------
+public:
     std::vector<Object *> objects;
     Camera camera; // 3D camera
     std::vector<Light> lights;
-public:
+
     void Build() {
         // Shaders
         Shader * phongShader = new PhongShader();
@@ -589,68 +590,47 @@ public:
         Geometry * sphere3 = new Sphere();
         Geometry *  cylindertop= new CylinderTop();
         Geometry * paraboloid = new Paraboloid();
-
         // Create objects by setting up their vertex data on the GPU
         Object *  planeObject1 = new Object(phongShader, material0, texture4x8, plane);
-        planeObject1->translation = vec3(0, -3.5, 0);
         planeObject1->scale = vec3(6.0f, 6.0f, 6.0f);
-        planeObject1->rotationAxis = vec3(0, 1, 0);
         objects.push_back( planeObject1);
 
         Object * cilinderObject0 = new Object(phongShader, material0, texture15x20,  cilinder0);
-        cilinderObject0->translation = vec3(0, -3.25, 0);
         cilinderObject0->scale = vec3(2.0f, 0.25f, 2.0f);
-        cilinderObject0->rotationAxis = vec3(0, 1, 0);
-        cilinderObject0->rotationAngle = 1.0f;
         objects.push_back(cilinderObject0);
 
         Object * mobiusObject1 = new Object(phongShader, material0, texture4x8, cylindertop);
-        mobiusObject1->translation = vec3(0, -3, 0);
         mobiusObject1->scale  = vec3(2.01f, 0.25f, 2.01f);
-        mobiusObject1->rotationAxis = vec3(0, 1, 0);
         objects.push_back(mobiusObject1);
         // Create objects by setting up their vertex data on the GPU
         Object * sphereObject1 = new Object(phongShader, material0, texture15x20, sphere1);
-        sphereObject1->translation = vec3(0, -3, 0);
         sphereObject1->scale = vec3(0.5f, 0.5f, 0.5f);
-        sphereObject1->rotationAxis = vec3(0, 1, 0);
         objects.push_back(sphereObject1);
 
         // Create objects by setting up their vertex data on the GPU
         Object * cilinderObject1 = new Object(phongShader, material0, texture15x20,  cilinder1);
-        cilinderObject1->translation = vec3(0, -2, 0);
         cilinderObject1->scale = vec3(0.3f, 1.0f, 0.3f);
-        cilinderObject1->rotationAxis = vec3(0, 1, 0);
-        cilinderObject1->rotationAngle = 0.0f;
         objects.push_back(cilinderObject1);
 
         // Create objects by setting up their vertex data on the GPU
         Object * sphereObject2 = new Object(phongShader, material0, texture15x20, sphere2);
-        sphereObject2->translation = vec3(0, -1, 0);
         sphereObject2->scale = vec3(0.5f, 0.5f, 0.5f);
-        sphereObject2->rotationAxis = vec3(0, 1, 0);
-        sphereObject2->rotationAngle = 0.0f;
+
         objects.push_back(sphereObject2);
 
         // Create objects by setting up their vertex data on the GPU
         Object * cilinderObject2 = new Object(phongShader, material0, texture15x20,  cilinder2);
-        cilinderObject2->translation = vec3(0, 0, 0);
         cilinderObject2->scale = vec3(0.3f, 1.0f, 0.3f);
-        cilinderObject2->rotationAxis = vec3(0, 1, 0);
-        cilinderObject2->rotationAngle = 0.0f;
         objects.push_back(cilinderObject2);
 
         // Create objects by setting up their vertex data on the GPU
         Object * sphereObject3 = new Object(phongShader, material0, texture15x20, sphere3);
-        sphereObject3->translation = vec3(0, 1, 0);
         sphereObject3->scale = vec3(0.5f, 0.5f, 0.5f);
-        sphereObject3->rotationAxis = vec3(0, 1, 0);
         objects.push_back(sphereObject3);
 
         Object * paraboloidObject1 = new Object(phongShader, material1, texture15x20, paraboloid);
-        paraboloidObject1->translation = vec3(0, 1, 0);
         paraboloidObject1->scale = vec3(2.0f, 2.0f, 2.0f);
-        paraboloidObject1->rotationAxis = vec3(0, 1, 0);
+
         objects.push_back(paraboloidObject1);
 
         int nObjects = objects.size();
@@ -687,7 +667,18 @@ public:
         for (Object * obj : objects) obj->Animate(tstart, tend);
     }
 };
+mat4 rotationMatrix(vec3 axis, float angle)
+{
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
 
+    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                0.0,                                0.0,                                0.0,                                1.0);
+}
 Scene scene;
 
 // Initialization, create an OpenGL context
@@ -703,7 +694,55 @@ void onDisplay() {
     glClearColor(0.5f, 0.5f, 0.8f, 1.0f);							// background color
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
     scene.Render();
-    glutSwapBuffers();									// exchange the two buffers
+    glutSwapBuffers();
+    // exchange the two buffers
+    float ttime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+    mat4 M, Minv;
+    vec4 temp;
+    scene.objects[0]->translation = vec3(0, -3.5, 0);
+    scene.objects[0]->rotationAxis = vec3(0, 1, 0);
+
+    scene.objects[1]->rotationAngle = 0.0f;
+    scene.objects[1]->rotationAxis = vec3(0, 1, 0);
+    scene.objects[1]->translation = vec3(0, -3.25, 0);
+
+
+    scene.objects[2]->rotationAngle = 0.0f;
+    scene.objects[2]->rotationAxis = vec3(0, 1, 0);
+    scene.objects[2]->translation = vec3(0, -3, 0);
+
+
+    scene.objects[3]->rotationAngle =0.0f;
+    scene.objects[3]->rotationAxis = vec3(0, 1, 0);
+    scene.objects[3]->translation = vec3(0, -3, 0);
+    scene.objects[3]->SetModelingTransform( M, Minv);
+
+    temp = vec4(0, 2, 0, 1) * M;
+    scene.objects[4]->rotationAngle = ttime;
+    scene.objects[4]->rotationAxis =vec3(-0.5,1,-0.3);
+    scene.objects[4]->translation = vec3(temp.x, temp.y, temp.z-6);
+    scene.objects[4]->SetModelingTransform( M, Minv);
+
+    temp = vec4(0, 1, 0, 1) * M;
+    scene.objects[5]->rotationAngle = 0.0f;
+    scene.objects[5]->rotationAxis = vec3(0, 1, 0);
+    scene.objects[5]->translation = vec3(temp.x, temp.y, temp.z);
+    scene.objects[5]->SetModelingTransform( M, Minv);
+
+    temp = vec4(0, 2, 0, 1) * M;
+    scene.objects[6]->rotationAngle = ttime;
+    scene.objects[6]->rotationAxis = vec3(1,1,0.5);
+    scene.objects[6]->translation =  vec3(temp.x, temp.y, temp.z);
+    scene.objects[6]->SetModelingTransform( M, Minv);
+
+    temp = vec4(0, 1, 0, 1) * M;
+    scene.objects[7]->rotationAngle = 0.0f;
+    scene.objects[7]->rotationAxis = vec3(0, 1, 0);
+    scene.objects[7]->translation = vec3(temp.x, temp.y, temp.z);
+
+    scene.objects[8]->rotationAngle = ttime;
+    scene.objects[8]->rotationAxis = vec3(0,0.5,0.5);
+    scene.objects[8]->translation = vec3(temp.x, temp.y, temp.z);
 }
 
 // Key of ASCII code pressed
