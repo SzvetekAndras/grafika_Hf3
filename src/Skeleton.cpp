@@ -720,7 +720,7 @@ void onDisplay() {
     temp = vec4(0, 2, 0, 1) * M;
     scene.objects[4]->rotationAngle = ttime;
     scene.objects[4]->rotationAxis =vec3(-0.5,1,-0.3);
-    scene.objects[4]->translation = vec3(temp.x, temp.y, temp.z-6);
+    scene.objects[4]->translation = vec3(temp.x, temp.y, temp.z);
     scene.objects[4]->SetModelingTransform( M, Minv);
 
     temp = vec4(0, 1, 0, 1) * M;
